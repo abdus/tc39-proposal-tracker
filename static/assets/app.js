@@ -1,3 +1,6 @@
+const mdConverter = new showdown.Converter();
+const loaderScreen = document.querySelector('#loader-screen');
+
 const template = ({ title, date, stage, reponame }) => `
 <div class="proposal" data-repo_name='${reponame}' data-repo_title='${title}'>
   <h3 class="title">${title}</h3>
@@ -21,21 +24,13 @@ const template = ({ title, date, stage, reponame }) => `
 </div>
 `;
 
-const mdConverter = new showdown.Converter();
-
 function handleCardClick() {
   document.querySelectorAll('.proposal').forEach(e => {
     e.addEventListener('click', async event => {
       const floatWindow = document.querySelector('#float-window-wrapper');
-      const floatWindow__h1 = document.querySelector(
-        '#float-window-wrapper h1'
-      );
       const floatWindow__content = document.querySelector(
         '#float-window-wrapper .content'
       );
-      const main__div = document.querySelector('main');
-
-      // floatWindow__h1.textContent = e.getAttribute('data-full_repo_name');
 
       const readme_content = await fetchGHreadme(
         e.getAttribute('data-repo_name')
@@ -45,6 +40,10 @@ function handleCardClick() {
       );
 
       floatWindow.classList.add('show');
+
+      // hide loader screen. `setTimeout` because the loader screen
+      // should be dismissed once the readme has been loaded
+      window.setTimeout(() => (loaderScreen.style.display = 'none'), 600);
 
       // hide floatWindow
       [...document.querySelectorAll('.close')].forEach(elem => {
@@ -57,6 +56,9 @@ function handleCardClick() {
 }
 
 async function fetchGHreadme(repo_name, owner, repo) {
+  // show loader screen
+  loaderScreen.style.display = 'block';
+
   let data = await fetch(`/api/readme?reponame=${repo_name}`);
   data = await data.json();
 
@@ -64,6 +66,9 @@ async function fetchGHreadme(repo_name, owner, repo) {
 }
 
 const proposalContainer__div = document.querySelector('.proprsals');
+
+// Show the loader screen
+loaderScreen.style.display = 'block';
 
 fetch('/api/repos.json')
   .then(data => data.json())
@@ -100,4 +105,49 @@ fetch('/api/repos.json')
 
     proposalContainer__div.innerHTML += htmlData;
     handleCardClick();
+
+    // hide loader screen
+    loaderScreen.style.display = 'none';
   });
+
+/**
+ * Hide/show Backdrop btns
+ */
+
+document
+  .querySelector('#side-drawer')
+  .addEventListener('click', e => e.stopImmediatePropagation());
+
+const hideBackdropBtn = document.querySelector(
+  '#hide-side-drawer-backdrop-btn'
+);
+hideBackdropBtn.addEventListener('click', () =>
+  document
+    .querySelector('#side-drawer-backdrop')
+    .classList.remove('side-drawer-backdrop-show')
+);
+
+const showSideDrawerBtn = document.querySelector('#show-side-drawer');
+showSideDrawerBtn.addEventListener('click', () =>
+  document
+    .querySelector('#side-drawer-backdrop')
+    .classList.add('side-drawer-backdrop-show')
+);
+
+document
+  .querySelector('#side-drawer-backdrop')
+  .addEventListener('click', () =>
+    document
+      .querySelector('#side-drawer-backdrop')
+      .classList.remove('side-drawer-backdrop-show')
+  );
+/**
+ * Close warning box
+ */
+
+document
+  .querySelector('.close-warn-box')
+  .addEventListener(
+    'click',
+    () => (document.querySelector('.warning').style.display = 'none')
+  );

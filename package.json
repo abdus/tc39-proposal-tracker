@@ -5,7 +5,11 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ENV_NODE=production node app.js"
+    "start": "ENV_NODE=production node app.js",
+    "deploy": "now -e DB_STRING=@tc39-proposal-tracker-db_string -e REGEX=@tc39-proposal-tracker-regex -e GH_API_KEY=@tc39-proposal-tracke-gh_api_key"
+  },
+  "engines": {
+    "node": ">10.0.0"
   },
   "keywords": [],
   "author": "",
